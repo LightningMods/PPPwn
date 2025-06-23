@@ -1,9 +1,9 @@
 TARGET = stage2
-OBJS = start.o stage2.o proc_utils.o  utils.o
+OBJS = start.o stage2.o
 
 CC = gcc
 OBJCOPY = objcopy
-CFLAGS = -DSMP -isystem ../freebsd-headers/include -Wl,--build-id=none -Os -fno-stack-protector -fpic -fpie
+CFLAGS = -DSMP -isystem ../freebsd-headers/include -Wl,--build-id=none -Os -fno-stack-protector 
 LDFLAGS = -T linker.ld -nostartfiles -nostdlib
 
 ifdef ENABLE_DEBUG_MENU_OFF
@@ -26,13 +26,24 @@ CFLAGS += -DMODULE_DUMPER=1
 CFLAGS += -UENABLE_DEBUG_MENU
 endif
 
+ifdef MIRA
+CFLAGS += -DMIRA=1
+CFLAGS += -UMODULE_DUMPER
+CFLAGS += -UENABLE_DEBUG_MENU
+CFLAGS += -UUSB_LOADER
+endif
+
 ifdef USB_LOADER
 CFLAGS += -DUSB_LOADER=1
 CFLAGS += -UMODULE_DUMPER
 CFLAGS += -UENABLE_DEBUG_MENU
 endif
 
+ifneq ($(filter $(FW), 850 900 903 904 950 960 1000 1001 1050 1070 1071 1100),)
 CFLAGS += -DFIRMWARE=$(FW)
+else
+$(error "Invalid firmware")
+endif
 
 all: $(TARGET).bin
 
